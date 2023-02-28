@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '9266010841bf'
+revision = "9266010841bf"
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -21,7 +21,7 @@ def upgrade() -> None:
     op.create_table(
         "projects",
         sa.Column(name="id", type_=sa.Integer(), primary_key=True),
-        sa.Column(name="project_name", type_=sa.String(), nullable=False, unique=True)
+        sa.Column(name="project_name", type_=sa.String(), nullable=False, unique=True),
     )
 
     # Create checkpoints table
@@ -29,14 +29,16 @@ def upgrade() -> None:
         "checkpoints",
         sa.Column(name="id", type_=sa.Integer(), primary_key=True),
         sa.Column(name="project_id", type_=sa.Integer(), nullable=False),
-        sa.Column(name="checkpoint_blob_storage_uid", type_=sa.String(), nullable=False)
+        sa.Column(
+            name="checkpoint_blob_storage_uid", type_=sa.String(), nullable=False
+        ),
     )
     op.create_foreign_key(
         constraint_name="fk_projects_checkpoint",
         source_table="checkpoints",
         referent_table="projects",
         local_cols=["project_id"],
-        remote_cols=["id"]
+        remote_cols=["id"],
     )
 
     # Create classes table
@@ -44,28 +46,30 @@ def upgrade() -> None:
         "classes",
         sa.Column(name="id", type_=sa.Integer(), primary_key=True),
         sa.Column(name="label", type_=sa.String(), nullable=False),
-        sa.Column(name="project_id", type_=sa.Integer(), nullable=False)
+        sa.Column(name="project_id", type_=sa.Integer(), nullable=False),
     )
     op.create_foreign_key(
         constraint_name="fk_projects_classes",
         source_table="classes",
         referent_table="projects",
         local_cols=["project_id"],
-        remote_cols=["id"]
+        remote_cols=["id"],
     )
 
     # Create images table
     op.create_table(
         "images",
-        sa.Column(name="blob_storage_uid", type_=sa.String(), unique=True, nullable=False),
-        sa.Column(name="classes_id", type_=sa.Integer(), nullable=False)
+        sa.Column(
+            name="blob_storage_uid", type_=sa.String(), unique=True, nullable=False
+        ),
+        sa.Column(name="classes_id", type_=sa.Integer(), nullable=False),
     )
     op.create_foreign_key(
         constraint_name="fk_classes_images",
         source_table="images",
         referent_table="classes",
         local_cols=["classes_id"],
-        remote_cols=["id"]
+        remote_cols=["id"],
     )
 
 
