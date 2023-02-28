@@ -1,0 +1,51 @@
+version: "3"
+
+services:
+  db:
+    container_name: postgres_training_canvas
+    image: "postgres:alpine3.17"
+#    restart: always
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - db:/var/lib/postgresql/data
+      - "./src/database/create-database.sql:/docker-entrypoint-initdb.d/create-tables.sql"
+
+  api:
+    container_name: api_training_canvas
+    build: .
+#    image: training-canvas:latest
+    depends_on:
+      - db
+    ports:
+      - "80:80"
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: postgres
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+    links:
+      - db
+    volumes:
+      - "./:/src"
+    command: "uvicorn src.api.app:app --host 0.0.0.0 --port 80"
+
+  azurite:
+    container_name: azurite_training_canvas
+    image: mcr.microsoft.com/azure-storage/azurite:3.22.0
+    volumes:
+      - azuritedata:/data
+    command: "azurite-blob --blobHost 0.0.0.0 -l /data"
+    ports:
+      - "10000:10000"
+
+volumes:
+  db:
+    driver: local
+  azuritedata:
+    driver: local
