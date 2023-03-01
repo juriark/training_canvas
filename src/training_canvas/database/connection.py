@@ -1,12 +1,15 @@
-from sqlalchemy import create_engine
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 import typing as t
-from training_canvas.database.orm_models import Projects, Base, Classes, Images, Checkpoints
 
-HOST = "172.22.0.1"
-connection_string = f"postgresql://postgres:postgres@{HOST}:5432/postgres"
-db_engine = create_engine(connection_string)
+from training_canvas.connection import db_engine
+from training_canvas.database.orm_models import (
+    Projects,
+    Base,
+    Classes,
+    Images,
+    Checkpoints,
+)
 
 
 class TrainingCanvasDB:
@@ -48,7 +51,9 @@ class TrainingCanvasDB:
         :param project_id: The id of the project this class belongs to
         :return: id of the added row. If the row already exists, returns None
         """
-        classes = self._write_to_db(self.session, Classes(label=label, project_id=project_id))
+        classes = self._write_to_db(
+            self.session, Classes(label=label, project_id=project_id)
+        )
         return classes.id
 
     def add_images(self, blob_storage_uid: str, classes_id: int) -> int:
@@ -58,7 +63,10 @@ class TrainingCanvasDB:
         :param classes_id: The id of class that defines the label of the image
         :return: id of the added row. If the row already exists, returns None
         """
-        image = self._write_to_db(self.session, Images(blob_storage_uid=blob_storage_uid, classes_id=classes_id))
+        image = self._write_to_db(
+            self.session,
+            Images(blob_storage_uid=blob_storage_uid, classes_id=classes_id),
+        )
         return image.blob_storage_uid
 
     def add_checkpoints(self, project_id: int, checkpoint_blob_storage_uid: str) -> int:
@@ -70,6 +78,9 @@ class TrainingCanvasDB:
         """
         checkpoint = self._write_to_db(
             self.session,
-            Checkpoints(project_id=project_id, checkpoint_blob_storage_uid=checkpoint_blob_storage_uid)
+            Checkpoints(
+                project_id=project_id,
+                checkpoint_blob_storage_uid=checkpoint_blob_storage_uid,
+            ),
         )
         return checkpoint.id
