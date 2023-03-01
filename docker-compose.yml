@@ -13,7 +13,6 @@ services:
       - "5432:5432"
     volumes:
       - db:/var/lib/postgresql/data
-      - "./src/database/create-database.sql:/docker-entrypoint-initdb.d/create-tables.sql"
 
   api:
     container_name: api_training_canvas
@@ -23,12 +22,12 @@ services:
       - db
     ports:
       - "80:80"
-    environment:
-      DB_HOST: db
-      DB_PORT: 5432
-      DB_NAME: postgres
-      DB_USER: postgres
-      DB_PASSWORD: postgres
+#    environment:
+#      DB_HOST: db
+#      DB_PORT: 5432
+#      DB_NAME: postgres
+#      DB_USER: postgres
+#      DB_PASSWORD: postgres
     links:
       - db
     volumes:
