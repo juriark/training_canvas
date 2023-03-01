@@ -28,14 +28,16 @@ class TrainingCanvasDB:
         try:
             session.commit()
             session.refresh(object)
-        except IntegrityError:
+            print(f"Write to table '{object.__tablename__}': '{object}'")
+        except IntegrityError as error:
             session.rollback()
             print(
                 f"Table '{object.__tablename__}' already contains an entry for value '{object}'."
             )
+            raise error
         return object
 
-    def add_project(self, project_name: str) -> t.Optional[int]:
+    def add_project(self, project_name: str) -> int:
         """
         Add a row to the projects table.
         :param project_name: Name of the project.
@@ -56,7 +58,7 @@ class TrainingCanvasDB:
         )
         return classes.id
 
-    def add_images(self, blob_storage_uid: str, classes_id: int) -> int:
+    def add_images(self, blob_storage_uid: str, classes_id: int) -> str:
         """
         Add a row to the images table.
         :param blob_storage_uid: The URL of the blob in azure.
@@ -69,7 +71,7 @@ class TrainingCanvasDB:
         )
         return image.blob_storage_uid
 
-    def add_checkpoints(self, project_id: int, checkpoint_blob_storage_uid: str) -> int:
+    def add_checkpoints(self, project_id: int, checkpoint_blob_storage_uid: str) -> str:
         """
         Add a row to the images table.
         :param blob_storage_uid: The URL of the blob in azure.

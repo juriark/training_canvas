@@ -29,9 +29,7 @@ def upgrade() -> None:
         "checkpoints",
         sa.Column(name="id", type_=sa.Integer(), primary_key=True),
         sa.Column(name="project_id", type_=sa.Integer(), nullable=False),
-        sa.Column(
-            name="checkpoint_blob_storage_uid", type_=sa.String(), nullable=False
-        ),
+        sa.Column(name="checkpoint_blob_name", type_=sa.String(), nullable=False),
     )
     op.create_foreign_key(
         constraint_name="fk_projects_checkpoint",
@@ -39,6 +37,11 @@ def upgrade() -> None:
         referent_table="projects",
         local_cols=["project_id"],
         remote_cols=["id"],
+    )
+    op.create_unique_constraint(
+        constraint_name="uc_checkpoint_blob_name_project_id",
+        table_name="checkpoints",
+        columns=("checkpoint_blob_name", "project_id"),
     )
 
     # Create classes table
@@ -55,13 +58,16 @@ def upgrade() -> None:
         local_cols=["project_id"],
         remote_cols=["id"],
     )
+    op.create_unique_constraint(
+        constraint_name="uc_label_project_id",
+        table_name="classes",
+        columns=("label", "project_id"),
+    )
 
     # Create images table
     op.create_table(
         "images",
-        sa.Column(
-            name="blob_storage_uid", type_=sa.String(), unique=True, nullable=False
-        ),
+        sa.Column(name="blob_name", type_=sa.String(), unique=True, nullable=False),
         sa.Column(name="classes_id", type_=sa.Integer(), nullable=False),
     )
     op.create_foreign_key(
