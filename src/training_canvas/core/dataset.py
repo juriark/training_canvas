@@ -2,25 +2,47 @@ from pathlib import Path
 
 import typing as t
 
+import torch.nn
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Query
 from torch.utils.data import Dataset
 
 from training_canvas.blob_storage.blob_storage import (
     upload_file_to_blob_storage,
-    BlobStorageContainerNameEnum,
+    BlobStorageContainerNameEnum, download_image_from_azure,
 )
-from training_canvas.core.utils import SKETCH_DIR
 from training_canvas.database.connection import TrainingCanvasDB
-from training_canvas.database.orm_models import Classes, Projects
+from training_canvas.database.orm_models import Classes, Projects, Images
 
-# TODO: consider separate class to handle the project (includes dataset, project_id, checkpoint maybe?)
+
 class SketchDataset(Dataset):
     """
     The Sketch Dataset is used for initial training of the training canvas
     Datasource: http://cybertron.cg.tu-berlin.de/eitz/projects/classifysketch/
     """
-    def __init__(self) -> None:
-        pass
+    def __init__(
+            self,
+            project_title: str = "initial-training-on-sketch-dataset",
+            transform: t.Optional[torch.nn.Sequential] = None
+    ) -> None:
+        with TrainingCanvasDB() as db:
+            self.project_id: int = db.session.query(Projects.id).where(project_title==project_title).first()[0]
+            self.labels: Query = db.get_classes_for_project(project_id=self.project_id)
+            self.blob_name: Query = db.get_blobs_names_for_project(project_id=self.project_id)
+        self.transform = transform
+
+    def __getitem__(self, item: int):
+        # Image
+        image = download_image_from_azure(self.blob_name[item].blob_name)
+        if self.transform:
+            image = self.transform(image)
+
+        # Label
+        label = self.labels.filter(Classes.id == self.blob_name[item].classes_id).first().label
+        return image, label
+
+    def __len__(self) -> int:
+        return len(self.blob_name)
 
     def from_local_directory(
         self,
@@ -73,12 +95,12 @@ class SketchDataset(Dataset):
                 )
 
 
-if __name__ == "__main__":
-    # Upload sketch dataset to blob storage, and write to database
-    if SKETCH_DIR.exists():
-        SketchDataset.from_local_directory(SKETCH_DIR)
-    else:
-        print(
-            "Automatic download of sketch dataset is currently not supported. Please download the dataset manually "
-            f"from http://cybertron.cg.tu-berlin.de/eitz/projects/classifysketch/, and save it to {SKETCH_DIR=}"
-        )
+# if __name__ == "__main__":
+    # # Upload sketch dataset to blob storage, and write to database
+    # if SKETCH_DIR.exists():
+    #     SketchDataset.from_local_directory(SKETCH_DIR)
+    # else:
+    #     print(
+    #         "Automatic download of sketch dataset is currently not supported. Please download the dataset manually "
+    #         f"from http://cybertron.cg.tu-berlin.de/eitz/projects/classifysketch/, and save it to {SKETCH_DIR=}"
+    #     )
