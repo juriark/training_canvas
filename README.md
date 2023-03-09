@@ -1,12 +1,12 @@
 # DISCLAIMER
-If I shared the link to this repository with you, please be aware that this is in a very early stage, and at this point probably serves as a means for you to get a general idea of my coding/working style. This project is mostly my **playground for trying out different technologies, frameworks and ideas related to machine learning and full stack development**, and at such not planned to ever be finished, but instead constantly updated and adapted.  
+If I shared the link to this repository with you, please be aware that this is in a very early stage, and at this point probably serves as a means for you to get a general idea of my tech stack and my coding style. This project is mostly my **playground for trying out different technologies, frameworks and ideas related to machine learning and full stack development**, and at such not planned to ever be finished, but instead constantly updated and adapted.  
 
 Also, ML-related development is currently on hold, since my GPU broke.
 
 
 ## Training Canvas
 Training Canvas is going to be a Web App, in which users can draw an object, and a neural network makes a prediction on what they have drawn. Users can also train their own model, by drawing objects, and so creating their own training dataset, as well as specifying their own hyperparameters used for training.  
-In it's current state though, it is first and foremost a 
+
 
 ### Functionality Web App
 - User can create a new, empty project
