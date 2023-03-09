@@ -16,3 +16,10 @@ lint:
 
 black:
 	docker run -v ~/Projects/training_canvas/src:/app/src ${IMAGE} black src/
+
+# TODO:
+#  setup
+#    - docker compose
+#    - alembic upgrade head
+#    - _azure_setup()
+#    - optional: upload SketchDataset to blob storage (for that data needs to be stored on local device)

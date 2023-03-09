@@ -1,9 +1,13 @@
+import io
 import uuid
 from pathlib import Path
 from enum import Enum
 
+import torch
+from PIL import Image
 from azure.storage.blob import ContainerClient, BlobClient
 from sqlalchemy.exc import IntegrityError
+from torchvision import transforms
 
 from training_canvas.connection import AZURE_CONNECTION_STRING
 from training_canvas.database.connection import TrainingCanvasDB
@@ -28,9 +32,9 @@ def upload_file_to_blob_storage(
     blob_container_client: ContainerClient = ContainerClient.from_connection_string(
         conn_str=AZURE_CONNECTION_STRING, container_name=container.value
     )
-    with open(file_path, "rb") as f:
+    with open(file_path, "rb") as file:
         blob: BlobClient = blob_container_client.upload_blob(
-            name=str(uuid.uuid4()), data=f
+            name=str(uuid.uuid4()), data=file
         )
 
     # Write to database
@@ -44,7 +48,16 @@ def upload_file_to_blob_storage(
             )
             blob_container_client.delete_blob(name=blob.blob_name)
 
-    print(f"Successfully uploaded {file_path=} to blob storage, {blob.url}.")
-    print(f"Successfully added a database entry.")
+    print(f"Successfully uploaded {file_path=} to blob storage, {blob.url}, and added a database entry.")
 
     return blob
+
+
+def download_image_from_azure(blob_name: str) -> torch.Tensor:
+    blob_container_client: ContainerClient = ContainerClient.from_connection_string(
+        conn_str=AZURE_CONNECTION_STRING, container_name=BlobStorageContainerNameEnum.IMAGES.value
+    )
+    img_content = blob_container_client.download_blob(blob_name).readall()
+    with Image.open(io.BytesIO(img_content)) as image:
+        tensor = transforms.PILToTensor()(image)
+    return tensor

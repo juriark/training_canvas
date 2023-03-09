@@ -1,7 +1,7 @@
 import logging
 
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, Query
 import typing as t
 
 from training_canvas.connection import db_engine
@@ -90,3 +90,12 @@ class TrainingCanvasDB:
             ),
         )
         return checkpoint.id
+
+    def get_classes_for_project(self, project_id: int) -> Query:
+        """Return all classes linked to a project"""
+        return self.session.query(Classes).filter(project_id==project_id)
+
+    def get_blobs_names_for_project(self, project_id: int) -> Query:
+        classes_id = [classes.id for classes in self.get_classes_for_project(project_id=project_id)]
+        images = self.session.query(Images).filter(classes_id==classes_id)
+        return images

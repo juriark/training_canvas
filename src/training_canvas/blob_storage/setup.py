@@ -11,7 +11,7 @@ _logger.setLevel(logging.DEBUG)
 
 
 def _azure_setup():
-    """Create azure containers"""
+    """Create default azure containers for setup."""
     blob_service_client: BlobServiceClient = BlobServiceClient.from_connection_string(
         AZURE_CONNECTION_STRING
     )
@@ -25,4 +25,4 @@ def _azure_setup():
 
 
 if __name__ == "__main__":
-    _azure_setup()
+    _azure_setup()  # TODO: add this to `make setup`

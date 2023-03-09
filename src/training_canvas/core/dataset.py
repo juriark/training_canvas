@@ -38,11 +38,11 @@ class SketchDataset(Dataset):
             image = self.transform(image)
 
         # Label
-        label = self.labels.filter(Classes.id == self.blob_name[item].classes_id).first().label
+        label = self.labels.filter(Classes.id == self.blob_name[item].classes_id).first().id  # TODO: don't use ID, but encoding
         return image, label
 
     def __len__(self) -> int:
-        return len(self.blob_name)
+        return len(self.blob_name.all())
 
     def from_local_directory(
         self,
